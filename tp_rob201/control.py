@@ -18,7 +18,7 @@ def reactive_obst_avoid(lidar):
     front_dist = laser_dist[front_mask]
     front_dist = front_dist[np.isfinite(front_dist)]
 
-    obstacle_detected = front_dist.size > 0 and np.min(front_dist) < 80
+    obstacle_detected = front_dist.size > 0 and np.min(front_dist) < 30
 
     if not hasattr(reactive_obst_avoid, "turn_steps"):
         reactive_obst_avoid.turn_steps = 0
