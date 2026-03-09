@@ -12,8 +12,29 @@ def reactive_obst_avoid(lidar):
     # TODO for TP1
 
     laser_dist = lidar.get_sensor_values()
-    speed = 0.0
-    rotation_speed = 0.0
+    ray_angles = lidar.get_ray_angles()
+
+    front_mask = np.abs(ray_angles) < np.deg2rad(25)
+    front_dist = laser_dist[front_mask]
+    front_dist = front_dist[np.isfinite(front_dist)]
+
+    obstacle_detected = front_dist.size > 0 and np.min(front_dist) < 80
+
+    if not hasattr(reactive_obst_avoid, "turn_steps"):
+        reactive_obst_avoid.turn_steps = 0
+        reactive_obst_avoid.turn_direction = 0.0
+
+    if obstacle_detected and reactive_obst_avoid.turn_steps == 0:
+        reactive_obst_avoid.turn_steps = random.randint(8, 18)
+        reactive_obst_avoid.turn_direction = random.choice([-0.8, 0.8])
+
+    if reactive_obst_avoid.turn_steps > 0:
+        speed = 0.0
+        rotation_speed = reactive_obst_avoid.turn_direction
+        reactive_obst_avoid.turn_steps -= 1
+    else:
+        speed = 0.4
+        rotation_speed = 0.0
 
     command = {"forward": speed,
                "rotation": rotation_speed}
