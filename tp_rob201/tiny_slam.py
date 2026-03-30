@@ -13,6 +13,7 @@ class TinySlam:
 
         # Origin of the odom frame in the map frame
         self.odom_pose_ref = np.array([0, 0, 0])
+        self._last_map_pose = None
 
     def _score(self, lidar, pose):
         """
@@ -57,7 +58,86 @@ class TinySlam:
         lidar : placebot object with lidar data
         pose : [x, y, theta] nparray, corrected pose in world coordinates
         """
-        # TODO for TP3
+        free_update = -0.08
+        occupied_update = 0.4
+        clip_min = -4.0
+        clip_max = 4.0
+        hit_margin = 4.0
+        free_margin = 4.0
+        min_translation_update = 2.0
+        min_rotation_update = np.deg2rad(1.5)
+
+        pose = np.array(pose, dtype=float)
+
+        if self._last_map_pose is not None:
+            delta_translation = np.linalg.norm(pose[:2] - self._last_map_pose[:2])
+            delta_rotation = abs(np.arctan2(np.sin(pose[2] - self._last_map_pose[2]),
+                                            np.cos(pose[2] - self._last_map_pose[2])))
+            if delta_translation < min_translation_update and delta_rotation < min_rotation_update:
+                return
+
+        self._last_map_pose = pose.copy()
+
+        ranges = lidar.get_sensor_values()
+        ray_angles = lidar.get_ray_angles()
+        max_range = float(lidar.max_range)
+
+        valid = np.logical_and(np.isfinite(ranges), ranges > 0)
+        ranges = ranges[valid]
+        ray_angles = ray_angles[valid]
+
+        if ranges.size == 0:
+            return
+
+        # Reduce the number of rays used at each step to keep the control loop responsive.
+        ranges = ranges[::2]
+        ray_angles = ray_angles[::2]
+
+        robot_x = float(pose[0])
+        robot_y = float(pose[1])
+        robot_theta = float(pose[2])
+
+        cos_theta = np.cos(robot_theta)
+        sin_theta = np.sin(robot_theta)
+
+        hit_points_x = []
+        hit_points_y = []
+        hit_cells = set()
+
+        for distance, angle in zip(ranges, ray_angles):
+            has_hit = distance < (max_range - hit_margin)
+            if not has_hit:
+                continue
+
+            usable_distance = distance
+
+            if usable_distance <= free_margin:
+                continue
+
+            free_distance = usable_distance - free_margin
+            free_x_robot = free_distance * np.cos(angle)
+            free_y_robot = free_distance * np.sin(angle)
+
+            free_x_world = robot_x + cos_theta * free_x_robot - sin_theta * free_y_robot
+            free_y_world = robot_y + sin_theta * free_x_robot + cos_theta * free_y_robot
+            self.grid.add_value_along_line(robot_x, robot_y, free_x_world, free_y_world, free_update)
+
+            if has_hit:
+                hit_x_robot = distance * np.cos(angle)
+                hit_y_robot = distance * np.sin(angle)
+                hit_x_world = robot_x + cos_theta * hit_x_robot - sin_theta * hit_y_robot
+                hit_y_world = robot_y + sin_theta * hit_x_robot + cos_theta * hit_y_robot
+
+                hit_cell = self.grid.conv_world_to_map(hit_x_world, hit_y_world)
+                if hit_cell not in hit_cells:
+                    hit_cells.add(hit_cell)
+                    hit_points_x.append(hit_x_world)
+                    hit_points_y.append(hit_y_world)
+
+        if hit_points_x:
+            self.grid.add_map_points(np.array(hit_points_x), np.array(hit_points_y), occupied_update)
+
+        np.clip(self.grid.occupancy_map, clip_min, clip_max, out=self.grid.occupancy_map)
 
     def compute(self):
         """ Useles function, just fosr the exercise on using the profiler """
