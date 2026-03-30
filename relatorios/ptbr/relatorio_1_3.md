@@ -31,8 +31,8 @@ Na função `reactive_obst_avoid()` em [tp_rob201/control.py](../../tp_rob201/co
 Para evitar mudanças bruscas no código, foi escolhida uma estratégia muito básica:
 
 - cone frontal: aproximadamente $\pm 25^\circ$,
-- limiar de detecção: distância frontal mínima inferior a `80`,
-- velocidade à frente quando o caminho está livre: `0.4`,
+- limiar de detecção: distância frontal mínima inferior a `30`,
+- velocidade à frente quando o caminho está livre: `0.9`,
 - velocidade de rotação durante o desvio: `-0.8` ou `0.8`,
 - duração da rotação: entre `8` e `18` iterações de controle.
 

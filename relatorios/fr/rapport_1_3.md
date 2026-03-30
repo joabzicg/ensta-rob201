@@ -31,8 +31,8 @@ Dans la fonction `reactive_obst_avoid()` de [tp_rob201/control.py](../../tp_rob2
 Pour éviter des changements brusques dans le code, une stratégie très simple a été choisie :
 
 - cône frontal : environ $\pm 25^\circ$,
-- seuil de détection : distance frontale minimale inférieure à `80`,
-- vitesse avant quand la voie est libre : `0.4`,
+- seuil de détection : distance frontale minimale inférieure à `30`,
+- vitesse avant quand la voie est libre : `0.9`,
 - vitesse de rotation pendant l’évitement : `-0.8` ou `0.8`,
 - durée de la rotation : entre `8` et `18` itérations de contrôle.
 
