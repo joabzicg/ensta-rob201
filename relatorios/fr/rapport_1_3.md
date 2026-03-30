@@ -54,3 +54,34 @@ Pour garder une solution simple :
 ## Remarque
 
 Cette étape implémente seulement une solution minimale pour le point 1.3, suffisante pour un premier comportement réactif de base.
+
+## Section 2.1 implémentée : Navigation réactive par champ de potentiel
+
+### Fichiers modifiés
+
+- [tp_rob201/control.py](../../tp_rob201/control.py)
+- [tp_rob201/my_robot_slam.py](../../tp_rob201/my_robot_slam.py)
+
+### Ce qui a été fait
+
+1. `MyRobotSlam.control()` utilise désormais `control_tp2()` (TP2) au lieu de `control_tp1()`.
+2. `potential_field_control()` a été implémentée dans `control.py` avec :
+   - champ attractif vers l’objectif fixe
+   - champ répulsif basé sur l’obstacle le plus proche détecté par le LIDAR
+   - réduction de vitesse à l’approche de l’objectif
+   - normalisation des commandes dans [-1, 1]
+3. `control_tp2()` appelle maintenant `potential_field_control(self.lidar(), pose, goal)`.
+4. Condition d’arrêt à proximité (2 unités) pour éviter l’oscillation.
+
+### Paramètres utilisés
+
+- K_goal = 0.02
+- K_obs = 500 (répulsion)
+- d_safe = 120
+- d_goal_stop = 30
+
+### Comportement attendu
+
+- Approche de l’objectif [0, 0, 0] avec un gradient attractif ;
+- avoidance des murs/obstacles détectés en LIDAR s’ils sont plus proches que d_safe ;
+- réduction de vitesse proche de l’objectif et arrêt en zone très proche.

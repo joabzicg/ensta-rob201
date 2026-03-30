@@ -54,3 +54,35 @@ Para manter a solução simples:
 ## Observação
 
 Esta etapa implementa apenas uma solução mínima para o item 1.3, suficiente para um primeiro comportamento reativo básico.
+
+## Seção 2.1 implementada: Navegação reativa por campo potencial
+
+### Arquivos modificados
+
+- [tp_rob201/control.py](../../tp_rob201/control.py)
+- [tp_rob201/my_robot_slam.py](../../tp_rob201/my_robot_slam.py)
+
+### O que foi feito
+
+1. `MyRobotSlam.control()` passou a usar `control_tp2()` (TP2) em vez de `control_tp1()`.
+2. `potential_field_control()` foi implementada em `control.py` com:
+   - potencial atrativo para meta fixa (goal)
+   - potencial repulsivo do obstáculo mais próximo detectado pelo LIDAR
+   - diminuição de velocidade ao se aproximar da meta
+   - normalização dos comandos em [-1, 1]
+3. `control_tp2()` agora chama `potential_field_control(self.lidar(), pose, goal)`.
+4. Condição de parada em distância pequena (2 unidades) para evitar oscilações.
+
+### Parâmetros usados
+
+- K_goal = 0.02
+- K_obs = 500 (repulsão)
+- d_safe = 120
+- d_goal_stop = 30
+
+### Comportamento esperado
+
+- Abordar a meta [0, 0, 0] com gradiente atrativo;
+- evitar paredes/obstáculos na direção do LIDAR que estiverem mais próximos que d_safe;
+- reduzir velocidade ao se aproximar da meta e parar na vizinhança muito próxima.
+

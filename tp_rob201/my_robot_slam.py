@@ -50,7 +50,8 @@ class MyRobotSlam(RobotAbstract):
         """
         Main control function executed at each time step
         """
-        return self.control_tp1()
+        # Muda para o controle TP2 com campo potencial
+        return self.control_tp2()
 
     def control_tp1(self):
         """
