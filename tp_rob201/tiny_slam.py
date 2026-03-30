@@ -60,7 +60,7 @@ class TinySlam:
         # TODO for TP3
 
     def compute(self):
-        """ Useless function, just for the exercise on using the profiler """
+        """ Useles function, just fosr the exercise on using the profiler """
         # Remove after TP1
 
         ranges = np.random.rand(3600)

@@ -33,7 +33,7 @@ def reactive_obst_avoid(lidar):
         rotation_speed = reactive_obst_avoid.turn_direction
         reactive_obst_avoid.turn_steps -= 1
     else:
-        speed = 0.4
+        speed = 0.9
         rotation_speed = 0.0
 
     command = {"forward": speed,
