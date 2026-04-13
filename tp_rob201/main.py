@@ -1,7 +1,6 @@
 """ A simple SLAM demonstration using the "placebot" robot simulator """
 
 import arcade
-from pathlib import Path
 
 from place_bot.simulation.ray_sensors.lidar import LidarParams
 from place_bot.simulation.robot.odometer import OdometerParams
@@ -14,7 +13,7 @@ from worlds.my_world import MyWorld
 
 
 def enable_wasd_keyboard_control():
-    """Extend the simulator keyboard controller to support WASD in addition to arrows."""
+    """Add WASD support to the simulator keyboard controller."""
 
     def on_key_press(self, key: int, modifiers: int) -> None:
         if self._command:
@@ -67,8 +66,3 @@ if __name__ == '__main__':
                           use_keyboard=True)
 
     simulator.run()
-
-    output_dir = Path(__file__).resolve().parent.parent / "generated_maps"
-    output_dir.mkdir(exist_ok=True)
-    output_base = output_dir / "manual_map_latest"
-    my_robot.occupancy_grid.save(str(output_base))

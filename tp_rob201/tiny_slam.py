@@ -89,7 +89,6 @@ class TinySlam:
         if ranges.size == 0:
             return
 
-        # Reduce the number of rays used at each step to keep the control loop responsive.
         ranges = ranges[::2]
         ray_angles = ray_angles[::2]
 
@@ -109,12 +108,10 @@ class TinySlam:
             if not has_hit:
                 continue
 
-            usable_distance = distance
-
-            if usable_distance <= free_margin:
+            if distance <= free_margin:
                 continue
 
-            free_distance = usable_distance - free_margin
+            free_distance = distance - free_margin
             free_x_robot = free_distance * np.cos(angle)
             free_y_robot = free_distance * np.sin(angle)
 
@@ -122,17 +119,16 @@ class TinySlam:
             free_y_world = robot_y + sin_theta * free_x_robot + cos_theta * free_y_robot
             self.grid.add_value_along_line(robot_x, robot_y, free_x_world, free_y_world, free_update)
 
-            if has_hit:
-                hit_x_robot = distance * np.cos(angle)
-                hit_y_robot = distance * np.sin(angle)
-                hit_x_world = robot_x + cos_theta * hit_x_robot - sin_theta * hit_y_robot
-                hit_y_world = robot_y + sin_theta * hit_x_robot + cos_theta * hit_y_robot
+            hit_x_robot = distance * np.cos(angle)
+            hit_y_robot = distance * np.sin(angle)
+            hit_x_world = robot_x + cos_theta * hit_x_robot - sin_theta * hit_y_robot
+            hit_y_world = robot_y + sin_theta * hit_x_robot + cos_theta * hit_y_robot
 
-                hit_cell = self.grid.conv_world_to_map(hit_x_world, hit_y_world)
-                if hit_cell not in hit_cells:
-                    hit_cells.add(hit_cell)
-                    hit_points_x.append(hit_x_world)
-                    hit_points_y.append(hit_y_world)
+            hit_cell = self.grid.conv_world_to_map(hit_x_world, hit_y_world)
+            if hit_cell not in hit_cells:
+                hit_cells.add(hit_cell)
+                hit_points_x.append(hit_x_world)
+                hit_points_y.append(hit_y_world)
 
         if hit_points_x:
             self.grid.add_map_points(np.array(hit_points_x), np.array(hit_points_y), occupied_update)
